@@ -4,6 +4,20 @@ import Anthropic from "@anthropic-ai/sdk";
 import { config } from "./config.js";
 import type { ClientContext, Draft, InstantlyReplyEvent } from "./types.js";
 
+/** Keep only the lead's new text: drop quoted history ("> ..." lines and everything from "On ... wrote:"). */
+export function latestReplyText(raw: string): string {
+  const lines = raw.replace(/\r/g, "").split("\n");
+  const out: string[] = [];
+  for (const line of lines) {
+    if (/^\s*On .+wrote:\s*$/i.test(line) || /^\s*On .+(\d{4}|AM|PM).*$/i.test(line) && /wrote/i.test(line)) break;
+    if (/^\s*-{2,}\s*Original Message/i.test(line) || /^\s*From:\s/i.test(line)) break;
+    if (/^\s*>/.test(line)) continue;
+    out.push(line);
+  }
+  const t = out.join("\n").trim();
+  return t || raw.trim();
+}
+
 export function buildSystemPrompt(ctx: ClientContext): string {
   const brain = ctx.brain
     .map((d) => `<doc title="${d.title.replace(/"/g, "'")}" tag="${d.tag}">\n${d.text}\n</doc>`)
@@ -22,6 +36,7 @@ export function buildSystemPrompt(ctx: ClientContext): string {
     ctx.replyGuidelines ? `Client guidelines:\n${ctx.replyGuidelines}` : "",
     `Do not reply (should_reply false) to out of office notices, unsubscribe requests, clear rejections, or wrong person replies.`,
     `Always answer by calling the submit_reply tool exactly once. Do not write any other text.`,
+    `When should_reply is true, body MUST contain the complete email text to send, written out in full (for example the actual proposed times or the booking link). Never describe what you would send instead of writing it, and never refer to a template by name.`,
     `<brain>\n${brain || "(empty)"}\n</brain>`,
   ]
     .filter(Boolean)
@@ -52,7 +67,7 @@ export async function draftReply(event: InstantlyReplyEvent, ctx: ClientContext)
   const thread = (ctx.thread || [])
     .map((m) => `${m.from === "lead" ? "LEAD" : "US"}${m.at ? ` (${m.at})` : ""}: ${m.text}`)
     .join("\n\n");
-  const latest = event.reply_text || event.reply_text_snippet || "";
+  const latest = latestReplyText(event.reply_text || event.reply_text_snippet || "");
 
   const res = await client.messages.create({
     model: config.model(),

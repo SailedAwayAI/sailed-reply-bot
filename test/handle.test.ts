@@ -139,3 +139,9 @@ test("a new reply in the same thread (same email_id, new text) is handled, not t
   assert.equal(second.action, "send");
   assert.equal(log.filter((x) => x === "SEND").length, 2);
 });
+
+test("a failing dashboard log entry does not stop the flow", async () => {
+  const { d, log } = deps({ testMode: true, reportToDashboard: async () => { throw new Error("dashboard events 409"); } });
+  assert.equal((await handleReply("acme", event(), d)).action, "send");
+  assert.deepEqual(log, ["slack"]);
+});
