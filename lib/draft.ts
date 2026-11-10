@@ -21,6 +21,7 @@ export function buildSystemPrompt(ctx: ClientContext): string {
     ctx.senderName ? `Sign off as ${ctx.senderName}.` : `Do not add a signature; the sending inbox adds one.`,
     ctx.replyGuidelines ? `Client guidelines:\n${ctx.replyGuidelines}` : "",
     `Do not reply (should_reply false) to out of office notices, unsubscribe requests, clear rejections, or wrong person replies.`,
+    `Always answer by calling the submit_reply tool exactly once. Do not write any other text.`,
     `<brain>\n${brain || "(empty)"}\n</brain>`,
   ]
     .filter(Boolean)
@@ -58,7 +59,7 @@ export async function draftReply(event: InstantlyReplyEvent, ctx: ClientContext)
     max_tokens: 800,
     system: buildSystemPrompt(ctx),
     tools: [TOOL],
-    tool_choice: { type: "tool", name: TOOL.name },
+    tool_choice: { type: "auto" },
     messages: [
       {
         role: "user",
@@ -68,8 +69,20 @@ export async function draftReply(event: InstantlyReplyEvent, ctx: ClientContext)
   });
 
   const block = res.content.find((b) => b.type === "tool_use");
-  if (!block || block.type !== "tool_use") throw new Error("Claude did not return a reply");
-  const i = block.input as Record<string, unknown>;
+  let i: Record<string, unknown>;
+  if (block && block.type === "tool_use") {
+    i = block.input as Record<string, unknown>;
+  } else {
+    // Fallback: the model answered in text. Try to read a JSON object, else treat the text as the draft for review.
+    const text = res.content.map((b) => (b.type === "text" ? b.text : "")).join("").trim();
+    const m = text.match(/\{[\s\S]*\}/);
+    try {
+      i = m ? JSON.parse(m[0]) : {};
+    } catch {
+      i = {};
+    }
+    if (!i.classification) i = { classification: "other", should_reply: Boolean(text), reason: "model did not use the tool", body: text, needs_human: true };
+  }
   const body = typeof i.body === "string" ? i.body.trim() : "";
   return {
     classification: (i.classification as Draft["classification"]) || "other",
