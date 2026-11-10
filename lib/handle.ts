@@ -29,7 +29,12 @@ export async function handleReply(clientId: string, event: InstantlyReplyEvent, 
 
   const ctx = await deps.getClientContext(clientId, event);
   const pre = precheck(event, ctx);
-  if (pre) return pre;
+  if (pre) {
+    if (deps.testMode) {
+      await deps.notifyAgency(`*[Test mode] ${ctx.clientName}*: ${event.lead_email} would SKIP before drafting: ${pre.reason}`);
+    }
+    return pre;
+  }
 
   const draft = await deps.draftReply(event, ctx);
   const decision = decide(event, ctx, draft, {

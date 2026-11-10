@@ -125,3 +125,9 @@ test("test mode never sends and never drafts into Unibox, only Slack and a log e
   assert.equal((await handleReply("acme", event(), d)).action, "send");
   assert.deepEqual(log, ["slack", "dash:skipped"]);
 });
+
+test("test mode also posts skips to Slack so nothing is silent", async () => {
+  const { d, log } = deps({ testMode: true, ctx: ctx({ campaigns: { c1: { mode: "off" } } }) });
+  assert.equal((await handleReply("acme", event(), d)).action, "skip");
+  assert.deepEqual(log, ["slack"]);
+});
