@@ -36,6 +36,7 @@ export async function POST(request: Request): Promise<Response> {
       ...svc,
       draftReply,
       sendingEnabled: config.sendingEnabled(),
+      testMode: config.testMode(),
     })
       .then((d) => console.log(JSON.stringify({ clientId, emailId: event.email_id, ...d })))
       .catch(async (err) => {

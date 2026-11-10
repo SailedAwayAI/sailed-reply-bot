@@ -34,4 +34,6 @@ export const config = {
    * even for campaigns set to Auto; it only drafts for review. Start with it off.
    */
   sendingEnabled: () => process.env.SENDING_ENABLED === "on",
+  /** Unless TEST_MODE is exactly "off", the bot runs as a side by side test: Slack only, nothing in Unibox, nothing sent. */
+  testMode: () => process.env.TEST_MODE !== "off",
 };

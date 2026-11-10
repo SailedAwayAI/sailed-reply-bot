@@ -119,3 +119,9 @@ test("non reply events are ignored", async () => {
   assert.equal((await handleReply("acme", event({ event_type: "lead_interested" }), d)).action, "ignore");
   assert.deepEqual(log, []);
 });
+
+test("test mode never sends and never drafts into Unibox, only Slack and a log entry", async () => {
+  const { d, log } = deps({ testMode: true });
+  assert.equal((await handleReply("acme", event(), d)).action, "send");
+  assert.deepEqual(log, ["slack", "dash:skipped"]);
+});

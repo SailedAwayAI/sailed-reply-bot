@@ -16,6 +16,8 @@ A small standalone app on Vercel that answers lead replies for every client. It 
 
 ## Safety switches
 
+* `TEST_MODE` is on unless set to exactly `off`. In test mode the bot runs side by side with the dashboard's own reply bot: it drafts, posts what it would have done to the agency Slack channel, writes a log entry, and never sends or puts a draft into Unibox.
+
 * `SENDING_ENABLED` must be exactly `on` for anything to be sent. Leave it off for the first days: every reply becomes a review draft.
 * Every campaign starts as Manual in the dashboard.
 * Only one system may reply. Before turning sending on, turn off the dashboard's built in reply bot sending and remove the old ReplyBot and n8n webhooks in Instantly.
