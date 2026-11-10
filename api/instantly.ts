@@ -3,11 +3,11 @@
 
 import { timingSafeEqual } from "node:crypto";
 import { waitUntil } from "@vercel/functions";
-import { config } from "../lib/config.ts";
-import { draftReply } from "../lib/draft.ts";
-import { handleReply } from "../lib/handle.ts";
-import * as svc from "../lib/services.ts";
-import type { InstantlyReplyEvent } from "../lib/types.ts";
+import { config } from "../lib/config.js";
+import { draftReply } from "../lib/draft.js";
+import { handleReply } from "../lib/handle.js";
+import * as svc from "../lib/services.js";
+import type { InstantlyReplyEvent } from "../lib/types.js";
 
 function secretOk(given: string | null): boolean {
   if (!given) return false;

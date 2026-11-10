@@ -1,7 +1,7 @@
 // The full flow for one Instantly reply event. Dependencies are injected so tests can run it without network.
 
-import { decide, precheck } from "./decide.ts";
-import type { ClientContext, Decision, Draft, InstantlyReplyEvent } from "./types.ts";
+import { decide, precheck } from "./decide.js";
+import type { ClientContext, Decision, Draft, InstantlyReplyEvent } from "./types.js";
 
 export interface Deps {
   claimEvent(clientId: string, emailId: string): Promise<boolean>;
@@ -10,7 +10,7 @@ export interface Deps {
   autoSentToday(clientId: string): Promise<number>;
   countAutoSend(clientId: string): Promise<void>;
   sendInstantlyReply(clientId: string, event: InstantlyReplyEvent, subject: string, body: string): Promise<void>;
-  reportToDashboard(clientId: string, payload: Parameters<typeof import("./services.ts").reportToDashboard>[1]): Promise<void>;
+  reportToDashboard(clientId: string, payload: Parameters<typeof import("./services.js").reportToDashboard>[1]): Promise<void>;
   notifyAgency(text: string): Promise<void>;
   sendingEnabled: boolean;
 }

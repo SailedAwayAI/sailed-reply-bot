@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { handleReply, type Deps } from "../lib/handle.ts";
-import type { ClientContext, Draft, InstantlyReplyEvent } from "../lib/types.ts";
+import { handleReply, type Deps } from "../lib/handle.js";
+import type { ClientContext, Draft, InstantlyReplyEvent } from "../lib/types.js";
 
 const now = new Date().toISOString();
 const event = (over: Partial<InstantlyReplyEvent> = {}): InstantlyReplyEvent => ({

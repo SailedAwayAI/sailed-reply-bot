@@ -1,8 +1,8 @@
 // Drafts a reply with Claude using only the client's Brain.
 
 import Anthropic from "@anthropic-ai/sdk";
-import { config } from "./config.ts";
-import type { ClientContext, Draft, InstantlyReplyEvent } from "./types.ts";
+import { config } from "./config.js";
+import type { ClientContext, Draft, InstantlyReplyEvent } from "./types.js";
 
 export function buildSystemPrompt(ctx: ClientContext): string {
   const brain = ctx.brain

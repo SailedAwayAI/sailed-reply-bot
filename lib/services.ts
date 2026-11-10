@@ -1,8 +1,8 @@
 // Network calls: dashboard, Instantly, Slack, and the Redis store for dedupe and caps.
 
 import { Redis } from "@upstash/redis";
-import { config } from "./config.ts";
-import type { ClientContext, InstantlyReplyEvent } from "./types.ts";
+import { config } from "./config.js";
+import type { ClientContext, InstantlyReplyEvent } from "./types.js";
 
 // ---------- Store (Upstash Redis via the Vercel Marketplace; reads UPSTASH_REDIS_REST_URL / _TOKEN) ----------
 

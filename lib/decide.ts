@@ -1,6 +1,6 @@
 // Pure decision rules. No network calls here, so every rule is covered by tests.
 
-import type { ClientContext, Decision, Draft, InstantlyReplyEvent, CampaignMode } from "./types.ts";
+import type { ClientContext, Decision, Draft, InstantlyReplyEvent, CampaignMode } from "./types.js";
 
 /** Lead statuses the bot must never reply to. Compared case insensitively. */
 const DO_NOT_REPLY_STATUSES = ["lost", "not interested", "unsubscribed", "do not contact", "wrong person", "won"];
