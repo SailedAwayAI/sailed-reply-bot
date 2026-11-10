@@ -8,7 +8,13 @@ import type { ClientContext, InstantlyReplyEvent } from "./types.ts";
 
 let redis: Redis | null = null;
 function store(): Redis {
-  if (!redis) redis = Redis.fromEnv();
+  if (!redis) {
+    // Vercel's Upstash integration names these KV_REST_API_*; plain Upstash uses UPSTASH_REDIS_REST_*.
+    const url = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
+    const token = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
+    if (!url || !token) throw new Error("Redis is not connected (KV_REST_API_URL / KV_REST_API_TOKEN missing)");
+    redis = new Redis({ url, token });
+  }
   return redis;
 }
 

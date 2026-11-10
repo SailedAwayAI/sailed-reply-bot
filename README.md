@@ -24,7 +24,7 @@ A small standalone app on Vercel that answers lead replies for every client. It 
 
 1. Create an empty GitHub repo `SailedAwayAI/sailed-reply-bot`; the code gets pushed there.
 2. In Vercel: Add New Project, import that repo. No build settings needed.
-3. In Vercel, Storage: add Upstash Redis (Marketplace) and connect it to the project. This adds `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` automatically.
+3. In Vercel, Storage: add Upstash Redis (Marketplace) and connect it to the project. This adds `KV_REST_API_URL` and `KV_REST_API_TOKEN` automatically.
 4. In Vercel, Settings, Environment Variables, add (you type these, never paste keys into chat):
    * `ANTHROPIC_API_KEY`
    * `WEBHOOK_SECRET` (any long random string)
