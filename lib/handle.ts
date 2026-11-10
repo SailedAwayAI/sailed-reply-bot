@@ -19,6 +19,12 @@ export interface Deps {
 
 export async function handleReply(clientId: string, event: InstantlyReplyEvent, deps: Deps): Promise<Decision> {
   if (event.event_type !== "reply_received" || !event.email_id) {
+    if (deps.testMode) {
+      // Show exactly what Instantly sent so a field name mismatch is obvious.
+      await deps.notifyAgency(
+        `*[Test mode] ${clientId}*: ignored an Instantly event (event_type=${event.event_type}, email_id=${event.email_id ? "present" : "missing"}). Fields received: ${Object.keys(event).join(", ")}`,
+      );
+    }
     return { action: "ignore", reason: `event ${event.event_type}` };
   }
 
