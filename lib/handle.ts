@@ -1,7 +1,14 @@
 // The full flow for one Instantly reply event. Dependencies are injected so tests can run it without network.
 
 import { decide, precheck } from "./decide.js";
+import { createHash } from "node:crypto";
 import type { ClientContext, Decision, Draft, InstantlyReplyEvent } from "./types.js";
+
+export function dedupeKey(event: InstantlyReplyEvent): string {
+  const text = (event.reply_text || event.reply_text_snippet || "").trim();
+  const h = createHash("sha256").update(`${event.timestamp || ""}|${text}`).digest("hex").slice(0, 16);
+  return `${event.email_id}:${h}`;
+}
 
 export interface Deps {
   claimEvent(clientId: string, emailId: string): Promise<boolean>;
@@ -28,8 +35,11 @@ export async function handleReply(clientId: string, event: InstantlyReplyEvent, 
     return { action: "ignore", reason: `event ${event.event_type}` };
   }
 
-  // Dedupe first: one reply per inbound email, ever.
-  if (!(await deps.claimEvent(clientId, event.email_id))) {
+  // Dedupe first: one reply per inbound message, ever. Instantly may reuse email_id across a thread,
+  // so the key also includes the reply time and a hash of the reply text.
+  const key = dedupeKey(event);
+  if (!(await deps.claimEvent(clientId, key))) {
+    if (deps.testMode) await deps.notifyAgency(`*[Test mode] ${clientId}*: ${event.lead_email} ignored as a duplicate delivery of the same reply.`);
     return { action: "ignore", reason: "already handled" };
   }
 

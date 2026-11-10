@@ -131,3 +131,11 @@ test("test mode also posts skips to Slack so nothing is silent", async () => {
   assert.equal((await handleReply("acme", event(), d)).action, "skip");
   assert.deepEqual(log, ["slack"]);
 });
+
+test("a new reply in the same thread (same email_id, new text) is handled, not treated as a duplicate", async () => {
+  const { d, log } = deps();
+  await handleReply("acme", event(), d);
+  const second = await handleReply("acme", event({ reply_text: "Also, what does it cost?", timestamp: new Date(Date.now() + 60000).toISOString() }), d);
+  assert.equal(second.action, "send");
+  assert.equal(log.filter((x) => x === "SEND").length, 2);
+});
